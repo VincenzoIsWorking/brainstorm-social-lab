@@ -44,8 +44,13 @@ const SocialPlatformCarousel: React.FC<SocialPlatformCarouselProps> = ({
   }, [platforms.length]);
 
   // Correctly handle the carousel's onSelect event
-  const handleCarouselSelect = (index: number) => {
-    setCurrentIndex(index);
+  // This needs to be a React event handler that extracts the index from the API
+  const handleCarouselSelect = (api: any) => {
+    // When the carousel API provides the current index, update our state
+    if (api && typeof api.selectedScrollSnap === 'function') {
+      const index = api.selectedScrollSnap();
+      setCurrentIndex(index);
+    }
   };
 
   return (

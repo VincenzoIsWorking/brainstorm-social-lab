@@ -69,13 +69,13 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Ensure the tags are properly formatted as an array
+      // By this point, values.tags has already been transformed to an array by Zod
       const formattedValues = {
         title: values.title,
         description: values.description,
         content: values.content,
         resource_type: values.resource_type,
-        tags: values.tags // This is already transformed by the schema
+        tags: values.tags // This is already transformed to string[] by the schema
       };
       
       if (isEditing && resourceId) {
