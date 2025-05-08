@@ -1,192 +1,16 @@
 
-import React, { useState, useEffect } from "react";
-import { Session, User } from "@supabase/supabase-js";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import React from "react";
 import { AuthContext } from "./AuthContext";
-import { cleanupAuthState, fetchUserProfile } from "./authUtils";
+import { useAuthState } from "./hooks/useAuthState";
+import { useAuthOperations } from "./hooks/useAuthOperations";
 
 interface AuthProviderProps {
   children: React.ReactNode;
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
-  const [user, setUser] = useState<User | null>(null);
-  const [profile, setProfile] = useState<any | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
-  const { toast } = useToast();
-
-  useEffect(() => {
-    // First set up the auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      console.log("Auth state changed:", event);
-      setSession(currentSession);
-      setUser(currentSession?.user ?? null);
-
-      // Defer profile fetching to avoid Supabase auth deadlocks
-      if (currentSession?.user) {
-        setTimeout(() => {
-          fetchUserProfile(currentSession.user.id).then(data => {
-            setProfile(data);
-          });
-        }, 0);
-      } else {
-        setProfile(null);
-      }
-    });
-
-    // Then check for existing session
-    const initializeAuth = async () => {
-      try {
-        setIsLoading(true);
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        
-        setSession(initialSession);
-        setUser(initialSession?.user ?? null);
-
-        if (initialSession?.user) {
-          const profileData = await fetchUserProfile(initialSession.user.id);
-          setProfile(profileData);
-        }
-      } catch (error) {
-        console.error("Error initializing auth:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    initializeAuth();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      // Clean up auth state first
-      cleanupAuthState();
-      
-      // Attempt to sign out globally before signing in
-      try {
-        await supabase.auth.signOut({ scope: "global" });
-      } catch (err) {
-        // Continue even if this fails
-      }
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Login riuscito",
-        description: "Benvenuto su SocialLab",
-      });
-
-    } catch (error: any) {
-      console.error("Error signing in:", error.message);
-      toast({
-        title: "Errore di accesso",
-        description: error.message,
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const signUp = async (email: string, password: string, userData: any) => {
-    try {
-      // Clean up auth state first
-      cleanupAuthState();
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: userData,
-        },
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Registrazione completata",
-        description: "Controlla la tua email per confermare la registrazione",
-      });
-
-    } catch (error: any) {
-      console.error("Error signing up:", error.message);
-      toast({
-        title: "Errore di registrazione",
-        description: error.message,
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const signInWithGoogle = async () => {
-    try {
-      // Clean up auth state first
-      cleanupAuthState();
-
-      console.log("Starting Google OAuth sign-in...");
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
-          scopes: 'email profile',
-        },
-      });
-
-      if (error) {
-        console.error("Google OAuth error:", error);
-        throw error;
-      }
-      
-      console.log("Google OAuth initiated successfully:", data);
-
-    } catch (error: any) {
-      console.error("Error signing in with Google:", error.message);
-      toast({
-        title: "Errore di accesso con Google",
-        description: error.message,
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
-  const signOut = async () => {
-    try {
-      // Clean up auth state
-      cleanupAuthState();
-      
-      // Attempt global sign out
-      const { error } = await supabase.auth.signOut({ scope: "global" });
-      if (error) throw error;
-
-      toast({
-        title: "Logout effettuato",
-        description: "Hai effettuato il logout con successo",
-      });
-      
-      // Force page reload for a clean state
-      window.location.href = '/';
-    } catch (error: any) {
-      console.error("Error signing out:", error.message);
-      toast({
-        title: "Errore durante il logout",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-  };
+  const { session, user, profile, isLoading, isAuthenticated } = useAuthState();
+  const { signIn, signUp, signInWithGoogle, signOut } = useAuthOperations();
 
   return (
     <AuthContext.Provider
@@ -194,7 +18,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         session,
         user,
         profile,
-        isAuthenticated: !!user,
+        isAuthenticated,
         isLoading,
         signIn,
         signUp,
