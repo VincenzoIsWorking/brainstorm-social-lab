@@ -142,24 +142,12 @@ export default {
 					}
 				},
 				"slide-platforms": {
-					"0%": {
-						transform: "translateX(0%)"
-					},
-					"20%": {
-						transform: "translateX(-100%)"
-					},
-					"40%": {
-						transform: "translateX(-200%)"
-					},
-					"60%": {
-						transform: "translateX(-300%)"
-					},
-					"80%": {
-						transform: "translateX(-400%)"
-					},
-					"100%": {
-						transform: "translateX(-500%)"
-					}
+					"0%": { transform: "translateX(0%)" },
+					"20%": { transform: "translateX(-100%)" },
+					"40%": { transform: "translateX(-200%)" },
+					"60%": { transform: "translateX(-300%)" },
+					"80%": { transform: "translateX(-400%)" },
+					"100%": { transform: "translateX(-500%)" }
 				},
 				"circular-move": {
 					"0%": {
@@ -167,6 +155,28 @@ export default {
 					},
 					"100%": {
 						transform: "rotate(360deg) translateX(50px) rotate(-360deg)"
+					}
+				},
+				"pulse-slow": {
+					"0%, 100%": { opacity: "1" },
+					"50%": { opacity: "0.5" }
+				},
+				"float": {
+					"0%, 100%": { transform: "translateY(0)" },
+					"50%": { transform: "translateY(-10px)" }
+				},
+				"shimmer": {
+					"0%": { backgroundPosition: "-200% 0" },
+					"100%": { backgroundPosition: "200% 0" }
+				},
+				"bounce-smooth": {
+					"0%, 100%": {
+						transform: "translateY(0)",
+						animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)"
+					},
+					"50%": {
+						transform: "translateY(-15px)",
+						animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)"
 					}
 				}
 			},
@@ -177,7 +187,17 @@ export default {
 				"scale-in": "scale-in 0.2s ease-out",
 				"rotate-in": "rotate-in 0.4s ease-out",
 				"slide-platforms": "slide-platforms 20s linear infinite",
-				"circular-move": "circular-move 10s linear infinite"
+				"circular-move": "circular-move 10s linear infinite",
+				"pulse-slow": "pulse-slow 3s ease-in-out infinite",
+				"float": "float 4s ease-in-out infinite",
+				"shimmer": "shimmer 2s linear infinite",
+				"bounce-smooth": "bounce-smooth 2s ease-in-out infinite",
+			},
+			transitionProperty: {
+				'height': 'height',
+				'spacing': 'margin, padding',
+				'width': 'width',
+				'size': 'height, width',
 			}
 		}
 	},

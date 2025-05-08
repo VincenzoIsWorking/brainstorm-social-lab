@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { LightbulbIcon, User, LogOut, Menu, Calendar, Search } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
+import ThemeToggle from "@/components/theme/ThemeToggle";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,11 +54,11 @@ const Navbar = () => {
   ];
 
   return (
-    <header className="border-b bg-white dark:bg-gray-950">
+    <header className="border-b bg-background/80 backdrop-blur-md dark:bg-gray-950/80 transition-all duration-300 fixed-header">
       <div className="container flex h-16 items-center justify-between">
         <div className="flex items-center gap-2">
           <LightbulbIcon className="h-6 w-6 text-brand-600" />
-          <Link to="/" className="text-xl font-heading font-bold">
+          <Link to="/" className="text-xl font-heading font-bold gradient-text">
             SocialLab
           </Link>
         </div>
@@ -70,7 +71,7 @@ const Navbar = () => {
                 <Link 
                   key={link.to}
                   to={link.to} 
-                  className={`text-sm font-medium transition-colors ${
+                  className={`text-sm font-medium transition-all duration-300 hover:scale-105 ${
                     location.pathname === link.to 
                       ? "text-brand-600" 
                       : "hover:text-brand-600"
@@ -86,7 +87,7 @@ const Navbar = () => {
                 <Link 
                   key={link.to}
                   to={link.to} 
-                  className={`text-sm font-medium transition-colors ${
+                  className={`text-sm font-medium transition-all duration-300 hover:scale-105 ${
                     location.pathname === link.to 
                       ? "text-brand-600" 
                       : "hover:text-brand-600"
@@ -101,48 +102,51 @@ const Navbar = () => {
         
         {/* Auth Buttons or User Menu */}
         <div className="flex items-center gap-4">
+          {/* Theme Toggle */}
+          <ThemeToggle />
+
           {isAuthenticated ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-                  <Avatar>
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full hover:scale-110 transition-transform">
+                  <Avatar className="border-2 border-accent">
                     <AvatarImage src={profile?.avatar_url} alt={profile?.username || "User"} />
-                    <AvatarFallback>{getInitials()}</AvatarFallback>
+                    <AvatarFallback className="bg-brand-500 text-white">{getInitials()}</AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="glass-panel">
                 <DropdownMenuLabel>
                   {profile?.username ? `@${profile.username}` : user?.email}
                 </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="/profile" className="cursor-pointer w-full">
+                  <Link to="/profile" className="cursor-pointer w-full transition-colors duration-200 hover:bg-accent/50">
                     <User className="mr-2 h-4 w-4" /> Profilo
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/calendar" className="cursor-pointer w-full">
+                  <Link to="/calendar" className="cursor-pointer w-full transition-colors duration-200 hover:bg-accent/50">
                     <Calendar className="mr-2 h-4 w-4" /> Calendario
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/research" className="cursor-pointer w-full">
+                  <Link to="/research" className="cursor-pointer w-full transition-colors duration-200 hover:bg-accent/50">
                     <Search className="mr-2 h-4 w-4" /> Ricerca
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => signOut()}>
+                <DropdownMenuItem onClick={() => signOut()} className="transition-colors duration-200 hover:bg-destructive/20">
                   <LogOut className="mr-2 h-4 w-4" /> Logout
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
             <>
-              <Button variant="outline" asChild className="hidden md:inline-flex">
+              <Button variant="outline" asChild className="hidden md:inline-flex transition-transform hover:scale-105">
                 <Link to="/auth">Accedi</Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="transition-transform hover:scale-105">
                 <Link to="/auth">Inizia Gratis</Link>
               </Button>
             </>
@@ -152,7 +156,7 @@ const Navbar = () => {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden"
+            className="md:hidden transition-transform hover:scale-110"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             <Menu className="h-6 w-6" />
@@ -162,7 +166,7 @@ const Navbar = () => {
       
       {/* Mobile Navigation */}
       {mobileMenuOpen && (
-        <div className="md:hidden px-4 py-2 pb-4 bg-white dark:bg-gray-950 border-t">
+        <div className="md:hidden px-4 py-2 pb-4 bg-background/95 dark:bg-gray-950/95 backdrop-blur-md border-t transition-all duration-300">
           <nav className="flex flex-col space-y-3">
             {isAuthenticated ? (
               // Private links for logged-in users
@@ -170,7 +174,7 @@ const Navbar = () => {
                 <Link 
                   key={link.to}
                   to={link.to} 
-                  className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-accent/50 dark:hover:bg-gray-800/50 rounded-md transition-all duration-300"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   {link.label}
@@ -183,7 +187,7 @@ const Navbar = () => {
                   <Link 
                     key={link.to}
                     to={link.to} 
-                    className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                    className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-accent/50 dark:hover:bg-gray-800/50 rounded-md transition-all duration-300"
                     onClick={() => setMobileMenuOpen(false)}
                   >
                     {link.label}
@@ -191,7 +195,7 @@ const Navbar = () => {
                 ))}
                 <Link 
                   to="/auth" 
-                  className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-accent/50 dark:hover:bg-gray-800/50 rounded-md transition-all duration-300"
                   onClick={() => setMobileMenuOpen(false)}
                 >
                   Accedi / Registrati
