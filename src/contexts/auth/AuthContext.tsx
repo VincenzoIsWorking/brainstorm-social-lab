@@ -8,9 +8,9 @@ export interface AuthContextProps {
   profile: any | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, userData: any) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
+  signIn: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string, userData: any) => Promise<any>;
+  signInWithGoogle: () => Promise<any>;
   signOut: () => Promise<void>;
 }
 
