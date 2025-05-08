@@ -1,6 +1,6 @@
 
 import React from "react";
-import { it } from "date-fns";
+import { it as itLocale } from "date-fns/locale"; // Corrected import for Italian locale
 import { cn } from "@/lib/utils";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -28,8 +28,8 @@ const CalendarSidebar: React.FC<CalendarSidebarProps> = ({
           mode="single"
           selected={date}
           onSelect={onDateChange}
-          className="rounded-md border"
-          locale={it}
+          className="rounded-md border pointer-events-auto"
+          locale={itLocale}
           modifiers={{ hasEvents: (day) => dayHasEvent(day) }}
           modifiersStyles={{
             hasEvents: { 

@@ -69,13 +69,13 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
 
   const onSubmit = async (values: FormValues) => {
     try {
-      // Ensure the values are properly formatted
+      // Ensure the tags are properly formatted as an array
       const formattedValues = {
         title: values.title,
         description: values.description,
         content: values.content,
         resource_type: values.resource_type,
-        tags: Array.isArray(values.tags) ? values.tags : []
+        tags: values.tags // This is already transformed by the schema
       };
       
       if (isEditing && resourceId) {

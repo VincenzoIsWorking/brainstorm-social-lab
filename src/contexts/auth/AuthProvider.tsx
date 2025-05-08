@@ -17,6 +17,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hasUser: !!auth.user
   });
   
+  // Define a default refreshProfile function if not provided by the hook
+  const refreshProfile = auth.refreshProfile || (() => Promise.resolve());
+  
   // Make sure all properties defined in AuthContextProps are passed to the provider
   return (
     <AuthContext.Provider value={{
@@ -30,7 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       signUp: auth.signUp,
       signInWithGoogle: auth.signInWithGoogle,
       signOut: auth.signOut,
-      refreshProfile: auth.refreshProfile || (() => Promise.resolve()),
+      refreshProfile: refreshProfile,
       clearAuthError: auth.clearAuthError
     }}>
       {children}

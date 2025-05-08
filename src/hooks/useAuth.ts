@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useCallback } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -30,6 +29,13 @@ export function useAuth() {
       console.error("Error in profile loading:", error);
     }
   }, []);
+
+  // Refresh profile function to reload user profile data
+  const refreshProfile = useCallback(async () => {
+    if (user) {
+      await loadUserProfile(user.id);
+    }
+  }, [user, loadUserProfile]);
 
   // Initialize authentication state and set up listeners
   useEffect(() => {
@@ -280,6 +286,7 @@ export function useAuth() {
     signUp,
     signInWithGoogle,
     signOut,
+    refreshProfile,
     
     // Utilities
     clearAuthError,

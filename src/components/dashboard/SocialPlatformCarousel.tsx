@@ -43,6 +43,11 @@ const SocialPlatformCarousel: React.FC<SocialPlatformCarouselProps> = ({
     return () => clearInterval(interval);
   }, [platforms.length]);
 
+  // Correctly handle the carousel's onSelect event
+  const handleCarouselSelect = (index: number) => {
+    setCurrentIndex(index);
+  };
+
   return (
     <div className="w-full">
       <Carousel
@@ -51,9 +56,7 @@ const SocialPlatformCarousel: React.FC<SocialPlatformCarouselProps> = ({
           loop: true,
         }}
         className="w-full"
-        onSelect={(index) => {
-          setCurrentIndex(index);
-        }}
+        onSelect={handleCarouselSelect}
       >
         <CarouselContent className="animate-slide-platforms">
           {platforms.map((platform, index) => (
