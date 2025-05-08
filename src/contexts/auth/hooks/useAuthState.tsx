@@ -11,6 +11,8 @@ export const useAuthState = () => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
+    console.log("useAuthState: Initializing auth state");
+    
     // First set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
       console.log("Auth state changed:", event);
@@ -33,7 +35,10 @@ export const useAuthState = () => {
     const initializeAuth = async () => {
       try {
         setIsLoading(true);
+        console.log("useAuthState: Checking for existing session");
+        
         const { data: { session: initialSession } } = await supabase.auth.getSession();
+        console.log("useAuthState: Session check result:", !!initialSession);
         
         setSession(initialSession);
         setUser(initialSession?.user ?? null);

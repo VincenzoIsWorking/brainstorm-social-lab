@@ -71,6 +71,9 @@ const Auth = () => {
     }
   };
 
+  // Console log per debugging
+  console.log("Auth component rendered. isAuthenticated:", isAuthenticated);
+
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       <div className="w-full max-w-md mx-auto my-12 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
