@@ -1,23 +1,16 @@
-import React, { createContext, useState, useContext, useEffect } from "react";
+
+import React, { useState, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { AuthContext } from "./AuthContext";
+import { cleanupAuthState, fetchUserProfile } from "./authUtils";
 
-interface AuthContextProps {
-  session: Session | null;
-  user: User | null;
-  profile: any | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, userData: any) => Promise<void>;
-  signInWithGoogle: () => Promise<void>;
-  signOut: () => Promise<void>;
+interface AuthProviderProps {
+  children: React.ReactNode;
 }
 
-const AuthContext = createContext<AuthContextProps | undefined>(undefined);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
@@ -34,7 +27,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Defer profile fetching to avoid Supabase auth deadlocks
       if (currentSession?.user) {
         setTimeout(() => {
-          fetchProfile(currentSession.user.id);
+          fetchUserProfile(currentSession.user.id).then(data => {
+            setProfile(data);
+          });
         }, 0);
       } else {
         setProfile(null);
@@ -51,7 +46,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(initialSession?.user ?? null);
 
         if (initialSession?.user) {
-          await fetchProfile(initialSession.user.id);
+          const profileData = await fetchUserProfile(initialSession.user.id);
+          setProfile(profileData);
         }
       } catch (error) {
         console.error("Error initializing auth:", error);
@@ -66,24 +62,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       subscription.unsubscribe();
     };
   }, []);
-
-  const fetchProfile = async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-
-      if (error) {
-        throw error;
-      }
-
-      setProfile(data);
-    } catch (error: any) {
-      console.error("Error fetching profile:", error.message);
-    }
-  };
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -210,26 +188,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  // Utility function to prevent auth limbo states
-  const cleanupAuthState = () => {
-    // Remove standard auth tokens
-    localStorage.removeItem('supabase.auth.token');
-    
-    // Remove all Supabase auth keys from localStorage
-    Object.keys(localStorage).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Remove from sessionStorage if in use
-    Object.keys(sessionStorage || {}).forEach((key) => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        sessionStorage.removeItem(key);
-      }
-    });
-  };
-
   return (
     <AuthContext.Provider
       value={{
@@ -247,12 +205,4 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       {children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error("useAuth must be used within an AuthProvider");
-  }
-  return context;
 };
