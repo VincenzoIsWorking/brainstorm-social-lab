@@ -9,7 +9,142 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      evaluations: {
+        Row: {
+          created_at: string | null
+          id: string
+          idea_id: string
+          score: number
+          strengths: string[] | null
+          weaknesses: string[] | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          idea_id: string
+          score: number
+          strengths?: string[] | null
+          weaknesses?: string[] | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          idea_id?: string
+          score?: number
+          strengths?: string[] | null
+          weaknesses?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "evaluations_idea_id_fkey"
+            columns: ["idea_id"]
+            isOneToOne: false
+            referencedRelation: "ideas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ideas: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          platform: string
+          score: number | null
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          platform: string
+          score?: number | null
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          platform?: string
+          score?: number | null
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          full_name: string | null
+          id: string
+          updated_at: string | null
+          username: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          full_name?: string | null
+          id?: string
+          updated_at?: string | null
+          username?: string | null
+        }
+        Relationships: []
+      }
+      recommendations: {
+        Row: {
+          created_at: string | null
+          duration: string | null
+          evaluation_id: string
+          hashtags: string[] | null
+          hook: string | null
+          id: string
+          visual_style: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          duration?: string | null
+          evaluation_id: string
+          hashtags?: string[] | null
+          hook?: string | null
+          id?: string
+          visual_style?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          duration?: string | null
+          evaluation_id?: string
+          hashtags?: string[] | null
+          hook?: string | null
+          id?: string
+          visual_style?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recommendations_evaluation_id_fkey"
+            columns: ["evaluation_id"]
+            isOneToOne: false
+            referencedRelation: "evaluations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
