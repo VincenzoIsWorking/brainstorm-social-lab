@@ -48,15 +48,12 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
   const navigate = useNavigate();
 
   // Convert array tags to comma-separated string for the form input
-  const defaultValues: FormValues = initialData ? {
-    ...initialData,
-    tags: Array.isArray(initialData.tags) ? initialData.tags.join(", ") : "",
-  } : {
-    title: "",
-    description: "",
-    content: "",
-    resource_type: "article",
-    tags: "",
+  const defaultValues: Partial<FormValues> = {
+    title: initialData?.title || "",
+    description: initialData?.description || "",
+    content: initialData?.content || "",
+    resource_type: initialData?.resource_type || "article",
+    tags: Array.isArray(initialData?.tags) ? initialData.tags.join(", ") : "",
   };
 
   const form = useForm<FormValues>({
