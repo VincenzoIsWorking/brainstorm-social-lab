@@ -22,7 +22,9 @@ export function useAuth() {
   // Load user profile data
   const loadUserProfile = useCallback(async (userId: string) => {
     try {
+      console.log("Caricamento profilo per l'utente:", userId);
       const profileData = await fetchUserProfile(userId);
+      console.log("Dati profilo ricevuti:", profileData);
       setProfile(profileData);
     } catch (error) {
       console.error("Error in profile loading:", error);
@@ -85,6 +87,7 @@ export function useAuth() {
         }
       } finally {
         if (mounted) {
+          console.log("Inizializzazione auth completata, isLoading impostato a false");
           setIsLoading(false);
         }
       }
@@ -252,13 +255,16 @@ export function useAuth() {
   };
 
   // Debug information
-  console.log("Auth state:", {
-    isAuthenticated: !!user,
-    isLoading,
-    hasSession: !!session,
-    userEmail: user?.email || "none",
-    hasProfile: !!profile
-  });
+  useEffect(() => {
+    console.log("Auth state updated:", {
+      isAuthenticated: !!user,
+      isLoading,
+      hasSession: !!session,
+      userEmail: user?.email || "none",
+      hasProfile: !!profile,
+      timestamp: new Date().toISOString()
+    });
+  }, [user, isLoading, session, profile]);
 
   return {
     // State

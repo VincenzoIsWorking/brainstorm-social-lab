@@ -1,7 +1,7 @@
 
 import React, { useEffect } from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "@/contexts/auth";
+import { useAuth } from "@/contexts/auth/AuthContext"; // Corretto il percorso di importazione
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -11,12 +11,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading, user } = useAuth();
   const location = useLocation();
 
+  // Migliorato il logging per debugging
   useEffect(() => {
-    console.log("ProtectedRoute mounted:", {
+    console.log("ProtectedRoute debug:", {
       path: location.pathname,
       isAuthenticated,
       isLoading,
-      user: user?.email
+      userEmail: user?.email || "nessun utente",
+      timestamp: new Date().toISOString()
     });
   }, [location.pathname, isAuthenticated, isLoading, user]);
 

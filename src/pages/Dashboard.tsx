@@ -1,11 +1,12 @@
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import StatsCard from "@/components/dashboard/StatsCard";
 import SocialPlatformCard from "@/components/dashboard/SocialPlatformCard";
 import { Button } from "@/components/ui/button";
-import { BarChart, LineChart, PieChart, Lightbulb, Plus } from "lucide-react";
+import { BarChart, LineChart, PieChart, Lightbulb, Plus, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/contexts/auth/AuthContext";
 
 // Mock data for the dashboard
 const mockStats = [
@@ -61,6 +62,51 @@ const socialPlatforms = [
 ];
 
 const Dashboard = () => {
+  const [hasError, setHasError] = useState(false);
+  const { isAuthenticated, user } = useAuth();
+  
+  useEffect(() => {
+    console.log("Dashboard rendered with auth state:", { isAuthenticated, userEmail: user?.email });
+  }, [isAuthenticated, user]);
+  
+  // Error boundary per catturare eventuali errori di rendering
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      console.error("Errore nella dashboard:", event.error);
+      setHasError(true);
+    };
+    
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
+  
+  // Componente di fallback in caso di errori
+  if (hasError) {
+    return (
+      <PageLayout>
+        <div className="container py-8">
+          <div className="flex flex-col items-center justify-center min-h-[60vh] text-center">
+            <div className="text-red-500 mb-4">
+              <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold mb-2">Si è verificato un errore</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Non è stato possibile caricare la dashboard. Riprovare più tardi.
+            </p>
+            <Button onClick={() => window.location.reload()}>
+              <RefreshCw className="mr-2 h-4 w-4" />
+              Ricarica la pagina
+            </Button>
+          </div>
+        </div>
+      </PageLayout>
+    );
+  }
+
   return (
     <PageLayout>
       <div className="container py-8">

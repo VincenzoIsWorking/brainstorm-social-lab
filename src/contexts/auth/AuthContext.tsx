@@ -33,6 +33,7 @@ export const useAuth = () => {
   const context = useContext(AuthContext);
   
   if (context === undefined) {
+    console.error("useAuth è stato chiamato fuori da un AuthProvider");
     throw new Error("useAuth must be used within an AuthProvider");
   }
   
