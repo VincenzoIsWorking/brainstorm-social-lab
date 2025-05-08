@@ -17,6 +17,7 @@ export interface AuthContextProps {
   signUp: (email: string, password: string, userData: any) => Promise<any>;
   signInWithGoogle: () => Promise<any>;
   signOut: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
   
   // State reset
   clearAuthError: () => void;

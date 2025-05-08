@@ -26,8 +26,27 @@ const platformColors = {
   youtube: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-200",
 };
 
-// Dummy calendar data
-const initialEvents = [
+interface CalendarEvent {
+  id: number;
+  title: string;
+  date: Date;
+  platform: string;
+  time: string;
+  description: string;
+  status: "draft" | "scheduled" | "published";
+}
+
+interface EventFormData {
+  title: string;
+  date: Date;
+  platform: string;
+  time: string;
+  description: string;
+  status: "draft" | "scheduled";
+}
+
+// Dummy calendar data with properly typed status values
+const initialEvents: CalendarEvent[] = [
   {
     id: 1,
     title: "Post sulla nuova collezione",
@@ -74,25 +93,6 @@ const initialEvents = [
     status: "draft",
   },
 ];
-
-interface CalendarEvent {
-  id: number;
-  title: string;
-  date: Date;
-  platform: string;
-  time: string;
-  description: string;
-  status: "draft" | "scheduled" | "published";
-}
-
-interface EventFormData {
-  title: string;
-  date: Date;
-  platform: string;
-  time: string;
-  description: string;
-  status: "draft" | "scheduled";
-}
 
 const Calendar = () => {
   const [date, setDate] = useState<Date>(new Date());
@@ -254,21 +254,15 @@ const Calendar = () => {
                   modifiersStyles={{
                     hasEvents: { 
                       fontWeight: 'bold',
-                      backgroundColor: 'hsl(var(--brand-50))',
-                      '&:hover': { backgroundColor: 'hsl(var(--brand-100))' }
+                      backgroundColor: 'hsl(var(--brand-50))'
                     },
                   }}
                   styles={{
-                    day_today: { 
-                      backgroundColor: 'hsl(var(--brand-100))',
-                      borderRadius: '3px',
-                      fontWeight: 'bold'
-                    },
                     day_selected: {
-                      backgroundColor: 'hsl(var(--brand-600)) !important',
-                      color: 'white !important',
+                      backgroundColor: 'hsl(var(--brand-600))',
+                      color: 'white',
                       borderRadius: '3px',
-                    },
+                    }
                   }}
                 />
               </Card>

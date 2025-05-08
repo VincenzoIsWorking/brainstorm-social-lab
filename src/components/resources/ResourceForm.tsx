@@ -48,7 +48,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
   const navigate = useNavigate();
 
   // Convert array tags to comma-separated string for the form input
-  const formattedInitialData: FormValues = initialData ? {
+  const formattedInitialData = initialData ? {
     ...initialData,
     tags: Array.isArray(initialData.tags) ? initialData.tags.join(", ") : "",
   } : {
@@ -69,14 +69,23 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
 
   const onSubmit = async (values: FormValues) => {
     try {
+      // Ensure the values are properly formatted
+      const formattedValues = {
+        title: values.title,
+        description: values.description,
+        content: values.content,
+        resource_type: values.resource_type,
+        tags: Array.isArray(values.tags) ? values.tags : []
+      };
+      
       if (isEditing && resourceId) {
-        await updateResource(resourceId, values);
+        await updateResource(resourceId, formattedValues);
         toast({
           title: "Resource updated",
           description: "Your resource has been updated successfully",
         });
       } else {
-        await createResource(values);
+        await createResource(formattedValues);
         toast({
           title: "Resource created",
           description: "Your resource has been created successfully",
