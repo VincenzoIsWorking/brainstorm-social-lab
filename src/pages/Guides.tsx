@@ -60,10 +60,10 @@ const guides = [
   },
   {
     id: 6,
-    title: "Twitter per il marketing B2B",
-    description: "Come utilizzare Twitter per generare lead qualificati e costruire relazioni nel settore B2B",
+    title: "X per il marketing B2B",
+    description: "Come utilizzare X per generare lead qualificati e costruire relazioni nel settore B2B",
     image: "https://images.unsplash.com/photo-1611605698323-b1e99cfd37ea?q=80&w=2574",
-    category: "Twitter",
+    category: "X",
     difficulty: "Intermedio",
     updatedAt: "8 Aprile 2025",
     chapters: 6
@@ -95,7 +95,7 @@ const Guides = () => {
           <Button variant="outline" className="rounded-full">LinkedIn</Button>
           <Button variant="outline" className="rounded-full">Facebook</Button>
           <Button variant="outline" className="rounded-full">YouTube</Button>
-          <Button variant="outline" className="rounded-full">Twitter</Button>
+          <Button variant="outline" className="rounded-full">X</Button>
         </div>
         
         {/* Guides Grid */}
