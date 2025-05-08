@@ -48,12 +48,12 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
   const navigate = useNavigate();
 
   // Convert array tags to comma-separated string for the form input
-  // The issue is fixed here by using the type assertion to tell TypeScript the value is a string
   const defaultValues: Partial<FormValues> = {
     title: initialData?.title || "",
     description: initialData?.description || "",
     content: initialData?.content || "",
     resource_type: initialData?.resource_type || "article",
+    // The tags field in FormValues is a string (before transform), so we need a string here:
     tags: Array.isArray(initialData?.tags) ? initialData.tags.join(", ") : "",
   };
 
