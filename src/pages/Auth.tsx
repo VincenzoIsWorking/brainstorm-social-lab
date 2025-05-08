@@ -116,9 +116,9 @@ const Auth = () => {
     setError(null);
     try {
       await signInWithGoogle();
+      // Redirect will happen automatically by Supabase
     } catch (error: any) {
       setError(error.message || "Errore durante l'accesso con Google");
-    } finally {
       setGoogleLoading(false);
     }
   };
