@@ -44,7 +44,7 @@ const ResourceFilterBar: React.FC<ResourceFilterBarProps> = ({
               <SelectValue placeholder="Resource Type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all">All Types</SelectItem>
               <SelectItem value="article">Articles</SelectItem>
               <SelectItem value="script">Scripts</SelectItem>
               <SelectItem value="idea">Ideas</SelectItem>
