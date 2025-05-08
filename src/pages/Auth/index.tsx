@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { LightbulbIcon } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -12,36 +12,44 @@ import SocialLogin from "@/components/auth/SocialLogin";
 
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const { signIn, signUp, signInWithGoogle, isAuthenticated } = useAuth();
+  const { signIn, signUp, signInWithGoogle, isAuthenticated, authError, clearAuthError } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get the page we should redirect to after login (if any)
+  const from = location.state?.from || "/dashboard";
+
+  // Clear any auth errors when switching between login/signup
+  useEffect(() => {
+    clearAuthError();
+  }, [isLogin, clearAuthError]);
 
   // Redirect if already logged in
   useEffect(() => {
     if (isAuthenticated) {
-      navigate("/dashboard");
+      console.log("User already authenticated, redirecting to:", from);
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, from]);
 
   const onLoginSubmit = async (values: LoginFormValues) => {
-    setIsLoading(true);
-    setError(null);
+    setIsSubmitting(true);
     try {
       await signIn(values.email, values.password);
       // Navigation will be handled by the useEffect above when isAuthenticated changes
     } catch (error: any) {
-      setError(error.message || "Errore durante il login");
+      console.error("Login error handled in form:", error);
+      // Error is already handled in the auth hook
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const onRegisterSubmit = async (values: RegisterFormValues) => {
     console.log("Register form submitted with values:", values);
-    setIsLoading(true);
-    setError(null);
+    setIsSubmitting(true);
     try {
       const userData = {
         full_name: values.fullName,
@@ -52,21 +60,22 @@ const Auth = () => {
       // Switch to login view after successful registration
       setIsLogin(true);
     } catch (error: any) {
-      setError(error.message || "Errore durante la registrazione");
+      console.error("Registration error handled in form:", error);
+      // Error is already handled in the auth hook
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   };
 
   const handleGoogleSignIn = async () => {
     setGoogleLoading(true);
-    setError(null);
     try {
       console.log("Initiating Google sign in from Auth.tsx");
       await signInWithGoogle();
       // Redirect will happen automatically by Supabase
     } catch (error: any) {
-      setError(error.message || "Errore durante l'accesso con Google");
+      console.error("Google sign in error handled in form:", error);
+      // Error is already handled in the auth hook
       setGoogleLoading(false);
     }
   };
@@ -88,9 +97,9 @@ const Auth = () => {
           {isLogin ? "Accedi al tuo account" : "Crea un nuovo account"}
         </h2>
 
-        {error && (
+        {authError && (
           <Alert variant="destructive" className="mb-4">
-            <AlertDescription>{error}</AlertDescription>
+            <AlertDescription>{authError}</AlertDescription>
           </Alert>
         )}
 
@@ -102,20 +111,23 @@ const Auth = () => {
         {isLogin ? (
           <LoginForm
             onSubmit={onLoginSubmit}
-            isLoading={isLoading}
+            isLoading={isSubmitting}
           />
         ) : (
           <RegisterForm
             onSubmit={onRegisterSubmit}
-            isLoading={isLoading}
+            isLoading={isSubmitting}
           />
         )}
 
         <div className="mt-6 text-center">
           <Button
             variant="link"
-            onClick={() => setIsLogin(!isLogin)}
-            disabled={isLoading || googleLoading}
+            onClick={() => {
+              setIsLogin(!isLogin);
+              clearAuthError();
+            }}
+            disabled={isSubmitting || googleLoading}
           >
             {isLogin
               ? "Non hai un account? Registrati"
