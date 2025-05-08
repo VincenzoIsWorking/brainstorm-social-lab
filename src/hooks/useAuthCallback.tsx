@@ -36,9 +36,10 @@ export const useAuthCallback = () => {
         }
         
         console.log("Auth callback successful, session retrieved:", !!data.session);
+        console.log("User:", data.session?.user?.email);
 
         // Navigate to dashboard after successful authentication
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       } catch (error: any) {
         console.error("Error processing authentication callback:", error);
         toast({
@@ -46,7 +47,7 @@ export const useAuthCallback = () => {
           description: error.message || "Si è verificato un errore durante l'autenticazione",
           variant: "destructive",
         });
-        navigate('/auth');
+        navigate('/auth', { replace: true });
       } finally {
         setIsProcessing(false);
       }

@@ -15,14 +15,16 @@ export const useAuthState = () => {
     
     // First set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      console.log("Auth state changed:", event);
+      console.log("Auth state changed:", event, "User:", currentSession?.user?.email);
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
 
       // Defer profile fetching to avoid Supabase auth deadlocks
       if (currentSession?.user) {
         setTimeout(() => {
+          console.log("Fetching user profile for:", currentSession.user.email);
           fetchUserProfile(currentSession.user.id).then(data => {
+            console.log("Profile data received:", data);
             setProfile(data);
           });
         }, 0);
@@ -38,13 +40,15 @@ export const useAuthState = () => {
         console.log("useAuthState: Checking for existing session");
         
         const { data: { session: initialSession } } = await supabase.auth.getSession();
-        console.log("useAuthState: Session check result:", !!initialSession);
+        console.log("useAuthState: Session check result:", !!initialSession, "User:", initialSession?.user?.email);
         
         setSession(initialSession);
         setUser(initialSession?.user ?? null);
 
         if (initialSession?.user) {
+          console.log("Initial session found, fetching profile for:", initialSession.user.email);
           const profileData = await fetchUserProfile(initialSession.user.id);
+          console.log("Initial profile data:", profileData);
           setProfile(profileData);
         }
       } catch (error) {
@@ -57,9 +61,17 @@ export const useAuthState = () => {
     initializeAuth();
 
     return () => {
+      console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
   }, []);
+
+  console.log("Auth state values:", {
+    isAuthenticated: !!user,
+    isLoading,
+    hasSession: !!session,
+    userEmail: user?.email || "none"
+  });
 
   return {
     session,

@@ -6,9 +6,13 @@ import { cleanupAuthState } from "../authUtils";
 
 export const useAuthOperations = () => {
   const { toast } = useToast();
+  const [isLoading, setIsLoading] = useState(false);
 
   const signIn = async (email: string, password: string) => {
     try {
+      setIsLoading(true);
+      console.log("Signing in user:", email);
+      
       // Clean up auth state first
       cleanupAuthState();
       
@@ -17,6 +21,7 @@ export const useAuthOperations = () => {
         await supabase.auth.signOut({ scope: "global" });
       } catch (err) {
         // Continue even if this fails
+        console.log("Pre-signin signout had an error (continuing anyway):", err);
       }
 
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -26,10 +31,14 @@ export const useAuthOperations = () => {
 
       if (error) throw error;
 
+      console.log("Login successful for:", email);
+      
       toast({
         title: "Login riuscito",
         description: "Benvenuto su SocialLab",
       });
+
+      return data;
 
     } catch (error: any) {
       console.error("Error signing in:", error.message);
@@ -39,11 +48,16 @@ export const useAuthOperations = () => {
         variant: "destructive",
       });
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signUp = async (email: string, password: string, userData: any) => {
     try {
+      setIsLoading(true);
+      console.log("Signing up user:", email);
+      
       // Clean up auth state first
       cleanupAuthState();
       
@@ -57,10 +71,14 @@ export const useAuthOperations = () => {
 
       if (error) throw error;
 
+      console.log("Sign up successful for:", email);
+      
       toast({
         title: "Registrazione completata",
         description: "Controlla la tua email per confermare la registrazione",
       });
+
+      return data;
 
     } catch (error: any) {
       console.error("Error signing up:", error.message);
@@ -70,16 +88,19 @@ export const useAuthOperations = () => {
         variant: "destructive",
       });
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signInWithGoogle = async () => {
     try {
+      setIsLoading(true);
+      console.log("Starting Google OAuth sign-in...");
+      
       // Clean up auth state first
       cleanupAuthState();
 
-      console.log("Starting Google OAuth sign-in...");
-      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
@@ -94,6 +115,7 @@ export const useAuthOperations = () => {
       }
       
       console.log("Google OAuth initiated successfully:", data);
+      return data;
 
     } catch (error: any) {
       console.error("Error signing in with Google:", error.message);
@@ -103,11 +125,16 @@ export const useAuthOperations = () => {
         variant: "destructive",
       });
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const signOut = async () => {
     try {
+      setIsLoading(true);
+      console.log("Signing out user");
+      
       // Clean up auth state
       cleanupAuthState();
       
@@ -115,6 +142,8 @@ export const useAuthOperations = () => {
       const { error } = await supabase.auth.signOut({ scope: "global" });
       if (error) throw error;
 
+      console.log("Sign out successful");
+      
       toast({
         title: "Logout effettuato",
         description: "Hai effettuato il logout con successo",
@@ -129,6 +158,8 @@ export const useAuthOperations = () => {
         description: error.message,
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -136,6 +167,7 @@ export const useAuthOperations = () => {
     signIn,
     signUp,
     signInWithGoogle,
-    signOut
+    signOut,
+    isLoading
   };
 };
