@@ -12,6 +12,10 @@ import AuthCallback from "./pages/Auth/callback";
 import Dashboard from "./pages/Dashboard";
 import Ideas from "./pages/Ideas";
 import NewIdea from "./pages/NewIdea";
+import Resources from "./pages/Resources";
+import NewResource from "./pages/NewResource";
+import ResourceDetail from "./pages/ResourceDetail";
+import EditResource from "./pages/EditResource";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -40,6 +44,26 @@ const App = () => (
             <Route path="/new-idea" element={
               <ProtectedRoute>
                 <NewIdea />
+              </ProtectedRoute>
+            } />
+            <Route path="/resources" element={
+              <ProtectedRoute>
+                <Resources />
+              </ProtectedRoute>
+            } />
+            <Route path="/new-resource" element={
+              <ProtectedRoute>
+                <NewResource />
+              </ProtectedRoute>
+            } />
+            <Route path="/resources/:id" element={
+              <ProtectedRoute>
+                <ResourceDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="/resources/edit/:id" element={
+              <ProtectedRoute>
+                <EditResource />
               </ProtectedRoute>
             } />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
