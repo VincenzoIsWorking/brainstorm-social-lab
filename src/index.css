@@ -45,6 +45,10 @@
     --sidebar-accent-foreground: 222 47% 30%;
     --sidebar-border: 214 32% 91%;
     --sidebar-ring: 224 76% 48%;
+    
+    /* Platform colors */
+    --platform-color: #6366f1;
+    --platform-background: #6366f110;
   }
 
   .dark {
@@ -84,6 +88,10 @@
     --sidebar-accent-foreground: 210 40% 98%;
     --sidebar-border: 217 33% 18%;
     --sidebar-ring: 224 76% 48%;
+
+    /* Platform colors dark mode */
+    --platform-color: #6366f1;
+    --platform-background: #6366f115;
   }
 }
 
@@ -105,3 +113,48 @@
   }
 }
 
+/* Platform-specific backgrounds */
+.platform-bg {
+  background-color: var(--platform-background);
+  transition: background-color 0.7s ease-in-out;
+}
+
+/* Fix the navbar header */
+.fixed-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+/* Circular transition animation */
+.platform-circular {
+  animation: circular-move 15s linear infinite;
+  transform-origin: center;
+}
+
+/* Make sure header stays fixed */
+.header-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+}
+
+/* Platform carousel animation */
+.animate-slide-platforms > * {
+  transform-origin: center;
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.7s ease;
+}
+
+.animate-slide-platforms:hover > * {
+  transform: scale(0.96);
+  opacity: 0.6;
+}
+
+.animate-slide-platforms > *:hover {
+  transform: scale(1.05) !important;
+  opacity: 1 !important;
+}

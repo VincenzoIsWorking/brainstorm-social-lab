@@ -69,7 +69,7 @@ export default {
 				social: {
 					linkedin: '#0A66C2',
 					facebook: '#1877F2',
-					twitter: '#1DA1F2',
+					x: '#000000', // Changed from twitter to X
 					youtube: '#FF0000',
 					tiktok: '#000000',
 					instagram: '#E4405F'
@@ -130,6 +130,44 @@ export default {
 						transform: "scale(1)",
 						opacity: "1"
 					}
+				},
+				"rotate-in": {
+					"0%": {
+						opacity: "0",
+						transform: "rotate(-10deg) scale(0.95)"
+					},
+					"100%": {
+						opacity: "1",
+						transform: "rotate(0deg) scale(1)"
+					}
+				},
+				"slide-platforms": {
+					"0%": {
+						transform: "translateX(0%)"
+					},
+					"20%": {
+						transform: "translateX(-100%)"
+					},
+					"40%": {
+						transform: "translateX(-200%)"
+					},
+					"60%": {
+						transform: "translateX(-300%)"
+					},
+					"80%": {
+						transform: "translateX(-400%)"
+					},
+					"100%": {
+						transform: "translateX(-500%)"
+					}
+				},
+				"circular-move": {
+					"0%": {
+						transform: "rotate(0deg) translateX(50px) rotate(0deg)"
+					},
+					"100%": {
+						transform: "rotate(360deg) translateX(50px) rotate(-360deg)"
+					}
 				}
 			},
 			animation: {
@@ -137,6 +175,9 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				"fade-in": "fade-in 0.3s ease-out",
 				"scale-in": "scale-in 0.2s ease-out",
+				"rotate-in": "rotate-in 0.4s ease-out",
+				"slide-platforms": "slide-platforms 20s linear infinite",
+				"circular-move": "circular-move 10s linear infinite"
 			}
 		}
 	},

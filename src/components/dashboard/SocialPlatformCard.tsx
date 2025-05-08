@@ -18,11 +18,11 @@ const SocialPlatformCard: React.FC<SocialPlatformCardProps> = ({
   count,
 }) => {
   return (
-    <Card className="card-hover-effect">
+    <Card className="card-hover-effect h-full transition-all duration-300 transform hover:scale-105">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-center">
           <div 
-            className="w-10 h-10 rounded-full flex items-center justify-center" 
+            className="w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300" 
             style={{ backgroundColor: `${color}20` }}
           >
             <div className="text-2xl" style={{ color }}>{icon}</div>

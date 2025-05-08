@@ -48,7 +48,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
   const navigate = useNavigate();
 
   // Convert array tags to comma-separated string for the form input
-  const formattedInitialData = initialData ? {
+  const defaultValues: FormValues = initialData ? {
     ...initialData,
     tags: Array.isArray(initialData.tags) ? initialData.tags.join(", ") : "",
   } : {
@@ -61,7 +61,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: formattedInitialData,
+    defaultValues: defaultValues,
   });
 
   const { formState } = form;

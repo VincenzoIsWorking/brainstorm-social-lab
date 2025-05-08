@@ -17,8 +17,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     hasUser: !!auth.user
   });
   
+  // Make sure all properties defined in AuthContextProps are passed to the provider
   return (
-    <AuthContext.Provider value={auth}>
+    <AuthContext.Provider value={{
+      session: auth.session,
+      user: auth.user,
+      profile: auth.profile,
+      isAuthenticated: auth.isAuthenticated,
+      isLoading: auth.isLoading,
+      authError: auth.authError,
+      signIn: auth.signIn,
+      signUp: auth.signUp,
+      signInWithGoogle: auth.signInWithGoogle,
+      signOut: auth.signOut,
+      refreshProfile: auth.refreshProfile,
+      clearAuthError: auth.clearAuthError
+    }}>
       {children}
     </AuthContext.Provider>
   );

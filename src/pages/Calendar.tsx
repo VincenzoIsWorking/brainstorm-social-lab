@@ -1,28 +1,36 @@
 
 import React, { useState } from "react";
-import PageLayout from "@/components/layout/PageLayout";
+import { Calendar as CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { format, isToday, isWeekend, isSameDay } from "date-fns";
+import { cn } from "@/lib/utils";
+import { format, isSameDay, isSameMonth, parseISO } from "date-fns";
 import { it } from "date-fns/locale";
+import PageLayout from "@/components/layout/PageLayout";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, Calendar as CalendarIcon, Edit } from "lucide-react";
 
-// Social platform colors
+// Status badge colors
+const statusColors = {
+  draft: "bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-300 border-amber-200",
+  scheduled: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-blue-200",
+  published: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300 border-green-200",
+};
+
+// Platform badge colors
 const platformColors = {
-  instagram: "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300 border-purple-200",
-  facebook: "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300 border-blue-200",
-  tiktok: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 border-gray-200",
   linkedin: "bg-sky-100 text-sky-800 dark:bg-sky-900 dark:text-sky-300 border-sky-200",
-  twitter: "bg-cyan-100 text-cyan-800 dark:bg-cyan-900 dark:text-cyan-300 border-cyan-200",
+  facebook: "bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300 border-indigo-200",
+  x: "bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300 border-gray-200", // Changed from twitter to x
+  instagram: "bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300 border-pink-200",
+  tiktok: "bg-black text-white dark:bg-gray-800 dark:text-gray-200 border-gray-400",
   youtube: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-200",
 };
 
@@ -50,46 +58,46 @@ const initialEvents: CalendarEvent[] = [
   {
     id: 1,
     title: "Post sulla nuova collezione",
-    date: new Date(2025, 4, 10),
+    date: new Date(2024, 4, 10),
     platform: "instagram",
-    time: "12:00",
-    description: "Presentazione dei nuovi prodotti con foto in studio.",
+    time: "10:00",
+    description: "Lancio della nuova collezione estiva",
     status: "scheduled",
   },
   {
     id: 2,
-    title: "Video tutorial del prodotto",
-    date: new Date(2025, 4, 12),
-    platform: "tiktok",
-    time: "17:30",
-    description: "Tutorial di 30 secondi che mostra come utilizzare il nostro prodotto.",
-    status: "scheduled",
-  },
-  {
-    id: 3,
-    title: "Articolo sul settore",
-    date: new Date(2025, 4, 14),
-    platform: "linkedin",
-    time: "09:00",
-    description: "Analisi delle tendenze del settore con insights esclusivi.",
+    title: "Video tutorial makeup",
+    date: new Date(2024, 4, 12),
+    platform: "youtube",
+    time: "15:00",
+    description: "Tutorial di makeup estivo con i nuovi prodotti",
     status: "draft",
   },
   {
+    id: 3,
+    title: "Articolo sul blog",
+    date: new Date(2024, 4, 15),
+    platform: "linkedin",
+    time: "08:30",
+    description: "Articolo sulle tendenze del settore",
+    status: "published",
+  },
+  {
     id: 4,
-    title: "Sondaggio preferenze clienti",
-    date: new Date(2025, 4, 15),
-    platform: "instagram",
-    time: "15:00",
-    description: "Sondaggio nelle stories per capire le preferenze dei clienti.",
+    title: "Sondaggio utenti",
+    date: new Date(2024, 4, 20),
+    platform: "facebook",
+    time: "12:00",
+    description: "Sondaggio sulle preferenze dei clienti",
     status: "scheduled",
   },
   {
     id: 5,
-    title: "Diretta Q&A",
-    date: new Date(2025, 4, 18),
-    platform: "facebook",
-    time: "18:30",
-    description: "Sessione live di domande e risposte con il nostro esperto.",
+    title: "Reel su nuovi prodotti",
+    date: new Date(2024, 4, 25),
+    platform: "instagram",
+    time: "17:00",
+    description: "Reel sui nuovi arrivi del mese",
     status: "draft",
   },
 ];
@@ -97,160 +105,160 @@ const initialEvents: CalendarEvent[] = [
 const Calendar = () => {
   const [date, setDate] = useState<Date>(new Date());
   const [events, setEvents] = useState<CalendarEvent[]>(initialEvents);
-  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [eventToDelete, setEventToDelete] = useState<number | null>(null);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [editEventId, setEditEventId] = useState<number | null>(null);
-  const [view, setView] = useState<"calendar" | "list">("calendar");
+  const [isDialogOpen, setIsDialogOpen] = useState<boolean>(false);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const { toast } = useToast();
   
+  // Form state
   const [formData, setFormData] = useState<EventFormData>({
     title: "",
     date: new Date(),
-    platform: "",
+    platform: "instagram",
     time: "12:00",
     description: "",
-    status: "draft"
+    status: "draft",
   });
-
-  // Events for selected date
-  const selectedDateEvents = events.filter(event => 
-    isSameDay(event.date, date)
-  );
-
-  // All events sorted by date
-  const sortedEvents = [...events].sort((a, b) => 
-    a.date.getTime() - b.date.getTime()
-  );
-
-  const handleDayClick = (day: Date) => {
-    setDate(day);
-  };
-
-  const openEventDialog = (event?: CalendarEvent) => {
-    if (event) {
-      setFormData({
-        title: event.title,
-        date: event.date,
-        platform: event.platform,
-        time: event.time,
-        description: event.description,
-        status: event.status === "published" ? "scheduled" : event.status
-      });
-      setIsEditMode(true);
-      setEditEventId(event.id);
-    } else {
-      setFormData({
-        title: "",
-        date: date,
-        platform: "",
-        time: "12:00",
-        description: "",
-        status: "draft"
-      });
-      setIsEditMode(false);
-      setEditEventId(null);
-    }
-    setIsEventDialogOpen(true);
-  };
-
-  const confirmDelete = (eventId: number) => {
-    setEventToDelete(eventId);
-    setIsDeleteDialogOpen(true);
-  };
-
-  const handleDelete = () => {
-    if (eventToDelete !== null) {
-      setEvents(events.filter(event => event.id !== eventToDelete));
-      toast({
-        title: "Evento eliminato",
-        description: "L'evento è stato eliminato dal calendario.",
-      });
-      setIsDeleteDialogOpen(false);
-      setEventToDelete(null);
+  
+  // Handle date selection in calendar
+  const handleDateSelect = (selectedDate: Date | undefined) => {
+    if (selectedDate) {
+      setDate(selectedDate);
     }
   };
-
-  const handleFormChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  
+  // Get events for selected day
+  const getEventsForDay = (day: Date) => {
+    return events.filter(event => isSameDay(event.date, day));
   };
-
-  const handleSubmit = () => {
-    if (isEditMode && editEventId) {
-      // Update existing event
-      setEvents(prevEvents => 
-        prevEvents.map(event => 
-          event.id === editEventId 
-            ? { ...formData, id: event.id, status: formData.status } 
-            : event
-        )
+  
+  // Event day style - used to highlight days with events
+  const dayHasEvent = (day: Date) => {
+    return events.some(event => isSameDay(day, event.date));
+  };
+  
+  // Create new event
+  const handleCreateEvent = () => {
+    const newEvent: CalendarEvent = {
+      id: events.length + 1,
+      title: formData.title,
+      date: formData.date,
+      platform: formData.platform,
+      time: formData.time,
+      description: formData.description,
+      status: formData.status,
+    };
+    
+    setEvents([...events, newEvent]);
+    setIsDialogOpen(false);
+    
+    // Reset form data
+    setFormData({
+      title: "",
+      date: new Date(),
+      platform: "instagram",
+      time: "12:00",
+      description: "",
+      status: "draft",
+    });
+    
+    toast({
+      title: "Evento creato",
+      description: `${formData.title} è stato aggiunto al calendario.`,
+    });
+  };
+  
+  // Update event
+  const handleUpdateEvent = () => {
+    if (selectedEvent) {
+      const updatedEvents = events.map(event => 
+        event.id === selectedEvent.id ? { ...event, ...formData } : event
       );
+      setEvents(updatedEvents);
+      setIsDialogOpen(false);
+      setSelectedEvent(null);
+      
       toast({
         title: "Evento aggiornato",
-        description: "Le modifiche sono state salvate.",
-      });
-    } else {
-      // Create new event
-      const newEvent: CalendarEvent = {
-        ...formData,
-        id: Math.max(0, ...events.map(e => e.id)) + 1,
-        status: formData.status,
-      };
-      setEvents([...events, newEvent]);
-      toast({
-        title: "Evento creato",
-        description: "Il nuovo evento è stato aggiunto al calendario.",
+        description: `${formData.title} è stato aggiornato.`,
       });
     }
-    setIsEventDialogOpen(false);
   };
-
-  // Function to check if a date has events
-  const hasEvents = (day: Date) => {
-    return events.some(event => isSameDay(event.date, day));
+  
+  // Delete event
+  const handleDeleteEvent = () => {
+    if (selectedEvent) {
+      const updatedEvents = events.filter(event => event.id !== selectedEvent.id);
+      setEvents(updatedEvents);
+      setIsDialogOpen(false);
+      setSelectedEvent(null);
+      
+      toast({
+        title: "Evento eliminato",
+        description: `${selectedEvent.title} è stato rimosso dal calendario.`,
+      });
+    }
+  };
+  
+  // Open dialog for new event
+  const openNewEventDialog = () => {
+    setSelectedEvent(null);
+    setFormData({
+      title: "",
+      date: date,
+      platform: "instagram",
+      time: "12:00",
+      description: "",
+      status: "draft",
+    });
+    setIsDialogOpen(true);
+  };
+  
+  // Open dialog for editing existing event
+  const openEditEventDialog = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setFormData({
+      title: event.title,
+      date: event.date,
+      platform: event.platform,
+      time: event.time,
+      description: event.description,
+      status: event.status === "published" ? "scheduled" : event.status,
+    });
+    setIsDialogOpen(true);
+  };
+  
+  // Handle input changes
+  const handleInputChange = (field: keyof EventFormData, value: any) => {
+    setFormData({ ...formData, [field]: value });
   };
 
   return (
     <PageLayout>
-      <div className="container py-12">
-        <div className="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold">Calendario Editoriale</h1>
-            <p className="text-muted-foreground">
-              Pianifica e organizza i contenuti per i tuoi social media
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Tabs value={view} onValueChange={(v) => setView(v as "calendar" | "list")} className="w-[260px]">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="calendar">Calendario</TabsTrigger>
-                <TabsTrigger value="list">Lista</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            <Button onClick={() => openEventDialog()}>
-              <Plus className="mr-2 h-4 w-4" /> Nuovo contenuto
-            </Button>
-          </div>
+      <div className="container py-8">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold">Calendario Contenuti</h1>
+          <Button onClick={openNewEventDialog}>
+            <Plus className="mr-2 h-4 w-4" />
+            Nuovo contenuto
+          </Button>
         </div>
         
-        <div>
-          <TabsContent value="calendar" className="mt-0">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Calendar */}
-              <Card className="col-span-2 p-4">
+        <div className="grid md:grid-cols-3 gap-6">
+          {/* Calendar */}
+          <div className="md:col-span-1">
+            <Card>
+              <CardHeader>
+                <CardTitle>Calendario</CardTitle>
+                <CardDescription>Gestisci i tuoi contenuti</CardDescription>
+              </CardHeader>
+              <CardContent>
                 <CalendarComponent
                   mode="single"
                   selected={date}
-                  onSelect={(date) => date && setDate(date)}
+                  onSelect={handleDateSelect}
                   className="rounded-md border"
                   locale={it}
-                  modifiers={{
-                    hasEvents: (date) => hasEvents(date),
-                  }}
+                  modifiers={{ hasEvents: (day) => dayHasEvent(day) }}
                   modifiersStyles={{
                     hasEvents: { 
                       fontWeight: 'bold',
@@ -258,205 +266,143 @@ const Calendar = () => {
                     },
                   }}
                   styles={{
-                    day_selected: {
-                      backgroundColor: 'hsl(var(--brand-600))',
-                      color: 'white',
+                    day: {
                       borderRadius: '3px',
                     }
                   }}
-                />
-              </Card>
-
-              {/* Events for selected date */}
-              <Card className="col-span-1">
-                <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2">
-                    <CalendarIcon className="h-5 w-5" />
-                    <span>
-                      {format(date, "d MMMM yyyy", { locale: it })}
-                    </span>
-                  </CardTitle>
-                  <CardDescription>
-                    {isToday(date) 
-                      ? "Contenuti per oggi" 
-                      : "Contenuti pianificati"}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {selectedDateEvents.length === 0 ? (
-                    <div className="text-center py-8 text-muted-foreground">
-                      <p>Nessun contenuto programmato</p>
-                      <Button 
-                        variant="ghost" 
-                        onClick={() => openEventDialog()}
-                        className="mt-2"
+                  components={{
+                    DayContent: (props) => (
+                      <div 
+                        className={cn(
+                          "flex relative items-center justify-center p-0",
+                          props.selected && "bg-brand-600 text-white rounded-md"
+                        )}
                       >
-                        <Plus className="mr-2 h-4 w-4" /> Aggiungi contenuto
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="space-y-3">
-                      {selectedDateEvents.map(event => (
-                        <Card key={event.id} className="p-3 hover:shadow-md transition-shadow">
-                          <div className="flex justify-between items-start gap-2">
-                            <div>
-                              <div className="flex items-center gap-2 mb-1.5">
-                                <Badge className={platformColors[event.platform as keyof typeof platformColors]}>
-                                  {event.platform}
-                                </Badge>
-                                <span className="text-sm text-muted-foreground">{event.time}</span>
-                              </div>
-                              <h3 className="font-medium">{event.title}</h3>
-                              <p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
-                            </div>
-                            <div className="flex">
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => openEventDialog(event)}
-                                className="h-8 w-8 p-0"
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm" 
-                                onClick={() => confirmDelete(event.id)}
-                                className="h-8 w-8 p-0 text-red-500 hover:text-red-600"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </div>
-                        </Card>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
+                        {props.date.getDate()}
+                        {dayHasEvent(props.date) && (
+                          <div className="absolute bottom-0 w-1 h-1 bg-brand-600 rounded-full"></div>
+                        )}
+                      </div>
+                    ),
+                  }}
+                />
+              </CardContent>
+            </Card>
+          </div>
           
-          <TabsContent value="list" className="mt-0">
-            <Card className="p-6">
-              <div className="space-y-3">
-                {sortedEvents.length === 0 ? (
-                  <div className="text-center py-12 text-muted-foreground">
-                    <p className="mb-2">Nessun contenuto programmato</p>
-                    <Button 
-                      onClick={() => openEventDialog()}
-                    >
-                      <Plus className="mr-2 h-4 w-4" /> Aggiungi il tuo primo contenuto
-                    </Button>
-                  </div>
-                ) : (
-                  sortedEvents.map(event => (
-                    <Card key={event.id} className="p-4 hover:shadow-md transition-shadow">
-                      <div className="flex flex-col sm:flex-row justify-between gap-4">
-                        <div className="flex flex-col">
-                          <div className="flex items-center gap-2 mb-1.5">
-                            <Badge className={platformColors[event.platform as keyof typeof platformColors]}>
+          {/* Events list */}
+          <div className="md:col-span-2">
+            <Card>
+              <CardHeader>
+                <CardTitle>
+                  Contenuti per {format(date, "d MMMM yyyy", { locale: it })}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {getEventsForDay(date).length > 0 ? (
+                    getEventsForDay(date).map((event) => (
+                      <div 
+                        key={event.id}
+                        className="border rounded-lg p-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors"
+                        onClick={() => openEditEventDialog(event)}
+                      >
+                        <div className="flex justify-between items-start mb-2">
+                          <h3 className="text-lg font-semibold">{event.title}</h3>
+                          <div className="flex space-x-2">
+                            <Badge variant="outline" className={platformColors[event.platform as keyof typeof platformColors]}>
                               {event.platform}
                             </Badge>
-                            <Badge variant={event.status === "published" ? "default" : event.status === "scheduled" ? "secondary" : "outline"}>
-                              {event.status === "published" ? "Pubblicato" : event.status === "scheduled" ? "Programmato" : "Bozza"}
+                            <Badge variant="outline" className={statusColors[event.status]}>
+                              {event.status}
                             </Badge>
                           </div>
-                          <h3 className="font-medium">{event.title}</h3>
-                          <p className="text-sm text-muted-foreground line-clamp-2">{event.description}</p>
                         </div>
-                        <div className="flex flex-col sm:items-end justify-between">
-                          <div className="flex items-center gap-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => openEventDialog(event)}
-                              className="h-8"
-                            >
-                              <Edit className="h-4 w-4 mr-1" /> Modifica
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              onClick={() => confirmDelete(event.id)}
-                              className="h-8 text-red-500 hover:text-red-600"
-                            >
-                              <Trash2 className="h-4 w-4 mr-1" /> Elimina
-                            </Button>
-                          </div>
-                          <div className="flex items-center gap-1 text-sm text-muted-foreground mt-2 sm:mt-0">
-                            <CalendarIcon className="h-4 w-4" />
-                            <span>
-                              {format(event.date, "d MMM yyyy", { locale: it })} - {event.time}
-                            </span>
-                          </div>
+                        <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mb-2">
+                          <CalendarIcon className="h-4 w-4 mr-1" /> {event.time}
                         </div>
+                        <p className="text-sm text-gray-600 dark:text-gray-300">{event.description}</p>
                       </div>
-                    </Card>
-                  ))
-                )}
-              </div>
+                    ))
+                  ) : (
+                    <div className="text-center py-6">
+                      <p className="text-gray-500 dark:text-gray-400 mb-4">Nessun contenuto programmato per questa data</p>
+                      <Button variant="outline" size="sm" onClick={openNewEventDialog}>
+                        <Plus className="h-4 w-4 mr-1" /> Aggiungi contenuto
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
             </Card>
-          </TabsContent>
+          </div>
         </div>
-        
-        {/* Add/Edit Event Dialog */}
-        <Dialog open={isEventDialogOpen} onOpenChange={setIsEventDialogOpen}>
-          <DialogContent className="sm:max-w-[500px]">
-            <DialogHeader>
-              <DialogTitle>
-                {isEditMode ? "Modifica contenuto" : "Nuovo contenuto"}
-              </DialogTitle>
-              <DialogDescription>
-                {isEditMode 
-                  ? "Modifica i dettagli del contenuto pianificato." 
-                  : "Aggiungi un nuovo contenuto al tuo calendario editoriale."}
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="title">Titolo</Label>
+      </div>
+      
+      {/* Modal for creating/editing events */}
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>{selectedEvent ? "Modifica contenuto" : "Nuovo contenuto"}</DialogTitle>
+            <DialogDescription>
+              {selectedEvent 
+                ? "Modifica i dettagli del contenuto programmato." 
+                : "Aggiungi un nuovo contenuto al calendario."}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Titolo</Label>
+              <Input 
+                id="title" 
+                value={formData.title} 
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                placeholder="Inserisci un titolo"
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label>Data</Label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="justify-start text-left font-normal"
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.date ? format(formData.date, "PP") : "Seleziona data"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      mode="single"
+                      selected={formData.date}
+                      onSelect={(date) => date && handleInputChange("date", date)}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label htmlFor="time">Ora</Label>
                 <Input 
-                  id="title" 
-                  value={formData.title}
-                  onChange={(e) => handleFormChange('title', e.target.value)}
-                  placeholder="Titolo del contenuto"
+                  id="time" 
+                  type="time" 
+                  value={formData.time} 
+                  onChange={(e) => handleInputChange("time", e.target.value)}
                 />
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="date">Data</Label>
-                  <div className="relative">
-                    <Input 
-                      id="date"
-                      type="date"
-                      value={format(formData.date, "yyyy-MM-dd")}
-                      onChange={(e) => {
-                        const newDate = new Date(e.target.value);
-                        if (!isNaN(newDate.getTime())) {
-                          handleFormChange('date', newDate);
-                        }
-                      }}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="time">Ora</Label>
-                  <Input 
-                    id="time"
-                    type="time"
-                    value={formData.time}
-                    onChange={(e) => handleFormChange('time', e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-2">
                 <Label htmlFor="platform">Piattaforma</Label>
-                <Select 
-                  value={formData.platform} 
-                  onValueChange={(value) => handleFormChange('platform', value)}
+                <Select
+                  value={formData.platform}
+                  onValueChange={(value) => handleInputChange("platform", value)}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Seleziona piattaforma" />
@@ -464,72 +410,68 @@ const Calendar = () => {
                   <SelectContent>
                     <SelectItem value="instagram">Instagram</SelectItem>
                     <SelectItem value="facebook">Facebook</SelectItem>
+                    <SelectItem value="x">X</SelectItem>
+                    <SelectItem value="linkedin">LinkedIn</SelectItem>
                     <SelectItem value="tiktok">TikTok</SelectItem>
                     <SelectItem value="youtube">YouTube</SelectItem>
-                    <SelectItem value="linkedin">LinkedIn</SelectItem>
-                    <SelectItem value="twitter">Twitter</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               
-              <div className="space-y-2">
+              <div className="grid gap-2">
                 <Label htmlFor="status">Stato</Label>
-                <Select 
-                  value={formData.status} 
-                  onValueChange={(value) => handleFormChange('status', value as "draft" | "scheduled")}
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleInputChange("status", value as "draft" | "scheduled")}
+                  disabled={selectedEvent?.status === "published"}
                 >
                   <SelectTrigger>
-                    <SelectValue />
+                    <SelectValue placeholder="Seleziona stato" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="draft">Bozza</SelectItem>
                     <SelectItem value="scheduled">Programmato</SelectItem>
+                    {selectedEvent?.status === "published" && (
+                      <SelectItem value="published">Pubblicato</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="description">Descrizione</Label>
-                <Textarea 
-                  id="description"
-                  value={formData.description}
-                  onChange={(e) => handleFormChange('description', e.target.value)}
-                  placeholder="Descrizione del contenuto..."
-                  className="min-h-[100px]"
-                />
-              </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsEventDialogOpen(false)}>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="description">Descrizione</Label>
+              <Textarea 
+                id="description" 
+                value={formData.description} 
+                onChange={(e) => handleInputChange("description", e.target.value)}
+                placeholder="Descrivi il contenuto"
+                rows={3}
+              />
+            </div>
+          </div>
+          
+          <DialogFooter className="flex justify-between">
+            {selectedEvent && (
+              <Button variant="destructive" type="button" onClick={handleDeleteEvent}>
+                <Trash2 className="h-4 w-4 mr-1" /> Elimina
+              </Button>
+            )}
+            <div>
+              <Button variant="outline" type="button" className="mr-2" onClick={() => setIsDialogOpen(false)}>
                 Annulla
               </Button>
-              <Button onClick={handleSubmit}>
-                {isEditMode ? "Salva modifiche" : "Aggiungi contenuto"}
+              <Button 
+                type="button" 
+                onClick={selectedEvent ? handleUpdateEvent : handleCreateEvent}
+                disabled={!formData.title}
+              >
+                {selectedEvent ? "Aggiorna" : "Crea"}
               </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-        
-        {/* Delete Confirmation Dialog */}
-        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Conferma eliminazione</DialogTitle>
-              <DialogDescription>
-                Sei sicuro di voler eliminare questo contenuto? Questa azione non può essere annullata.
-              </DialogDescription>
-            </DialogHeader>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
-                Annulla
-              </Button>
-              <Button variant="destructive" onClick={handleDelete}>
-                Elimina
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </PageLayout>
   );
 };

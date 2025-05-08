@@ -1,12 +1,12 @@
-
 import React, { useState, useEffect } from "react";
 import PageLayout from "@/components/layout/PageLayout";
 import StatsCard from "@/components/dashboard/StatsCard";
-import SocialPlatformCard from "@/components/dashboard/SocialPlatformCard";
+import SocialPlatformCarousel from "@/components/dashboard/SocialPlatformCarousel";
 import { Button } from "@/components/ui/button";
 import { BarChart, LineChart, PieChart, Lightbulb, Plus, RefreshCw } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/contexts/auth/AuthContext";
+import { usePlatformBackground } from "@/hooks/use-platform-background";
 
 // Mock data for the dashboard
 const mockStats = [
@@ -32,9 +32,9 @@ const socialPlatforms = [
     count: 5,
   },
   {
-    platform: "Twitter",
-    icon: <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5"><path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" /></svg>,
-    color: "#1DA1F2",
+    platform: "X",
+    icon: <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5"><path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" /></svg>,
+    color: "#000000",
     description: "Tweet e thread",
     count: 3,
   },
@@ -64,12 +64,28 @@ const socialPlatforms = [
 const Dashboard = () => {
   const [hasError, setHasError] = useState(false);
   const { isAuthenticated, user } = useAuth();
+  const { updateBackground } = usePlatformBackground();
+  const [activePlatform, setActivePlatform] = useState(socialPlatforms[0]);
+  
+  // Handle platform change
+  const handlePlatformChange = (platform: any) => {
+    setActivePlatform(platform);
+    updateBackground(platform);
+  };
   
   useEffect(() => {
     console.log("Dashboard rendered with auth state:", { isAuthenticated, userEmail: user?.email });
+    // Set initial platform background
+    updateBackground(socialPlatforms[0]);
+    
+    return () => {
+      // Reset background when unmounting
+      document.documentElement.style.removeProperty('--platform-color');
+      document.documentElement.style.removeProperty('--platform-background');
+    };
   }, [isAuthenticated, user]);
   
-  // Error boundary per catturare eventuali errori di rendering
+  // Error boundary to catch rendering errors
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
       console.error("Errore nella dashboard:", event.error);
@@ -80,7 +96,7 @@ const Dashboard = () => {
     return () => window.removeEventListener('error', handleError);
   }, []);
   
-  // Componente di fallback in caso di errori
+  // Error fallback component
   if (hasError) {
     return (
       <PageLayout>
@@ -109,49 +125,52 @@ const Dashboard = () => {
 
   return (
     <PageLayout>
-      <div className="container py-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <Button asChild>
-            <Link to="/new-idea">
-              <Plus className="mr-2 h-4 w-4" />
-              Nuova idea
-            </Link>
-          </Button>
-        </div>
+      <div className="relative">
+        <div 
+          className="fixed inset-0 transition-colors duration-700 -z-10" 
+          style={{
+            backgroundColor: `${activePlatform.color}10`,
+          }}
+        />
+        
+        <div className="container py-8">
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-3xl font-bold">Dashboard</h1>
+            <Button asChild>
+              <Link to="/new-idea">
+                <Plus className="mr-2 h-4 w-4" />
+                Nuova idea
+              </Link>
+            </Button>
+          </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          {mockStats.map((stat, index) => (
-            <StatsCard
-              key={index}
-              title={stat.title}
-              value={stat.value}
-              description={stat.description}
-              icon={stat.icon}
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
+            {mockStats.map((stat, index) => (
+              <StatsCard
+                key={index}
+                title={stat.title}
+                value={stat.value}
+                description={stat.description}
+                icon={stat.icon}
+              />
+            ))}
+          </div>
+
+          <h2 className="text-2xl font-bold mb-4">Idee per piattaforma</h2>
+          <div className="mb-8">
+            <SocialPlatformCarousel 
+              platforms={socialPlatforms} 
+              onPlatformChange={handlePlatformChange}
             />
-          ))}
-        </div>
+          </div>
 
-        <h2 className="text-2xl font-bold mb-4">Idee per piattaforma</h2>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-8">
-          {socialPlatforms.map((platform, index) => (
-            <SocialPlatformCard
-              key={index}
-              platform={platform.platform}
-              icon={platform.icon}
-              color={platform.color}
-              description={platform.description}
-              count={platform.count}
-            />
-          ))}
-        </div>
-
-        <div className="flex justify-center mt-8">
-          <Button asChild variant="outline" className="w-full max-w-xs">
-            <Link to="/ideas">
-              Visualizza tutte le mie idee
-            </Link>
-          </Button>
+          <div className="flex justify-center mt-8">
+            <Button asChild variant="outline" className="w-full max-w-xs">
+              <Link to="/ideas">
+                Visualizza tutte le mie idee
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
     </PageLayout>
