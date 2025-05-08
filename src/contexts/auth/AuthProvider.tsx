@@ -30,7 +30,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       signUp: auth.signUp,
       signInWithGoogle: auth.signInWithGoogle,
       signOut: auth.signOut,
-      refreshProfile: auth.refreshProfile,
+      refreshProfile: auth.refreshProfile || (() => Promise.resolve()),
       clearAuthError: auth.clearAuthError
     }}>
       {children}

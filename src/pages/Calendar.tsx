@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Calendar as CalendarIcon, Plus, Trash2 } from "lucide-react";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -34,6 +33,8 @@ const platformColors = {
   youtube: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300 border-red-200",
 };
 
+type StatusType = "draft" | "scheduled" | "published";
+
 interface CalendarEvent {
   id: number;
   title: string;
@@ -41,7 +42,7 @@ interface CalendarEvent {
   platform: string;
   time: string;
   description: string;
-  status: "draft" | "scheduled" | "published";
+  status: StatusType;
 }
 
 interface EventFormData {
@@ -263,11 +264,11 @@ const Calendar = () => {
                     hasEvents: { 
                       fontWeight: 'bold',
                       backgroundColor: 'hsl(var(--brand-50))'
-                    },
+                    }
                   }}
                   styles={{
                     day: {
-                      borderRadius: '3px',
+                      borderRadius: '3px'
                     }
                   }}
                   components={{
@@ -275,7 +276,7 @@ const Calendar = () => {
                       <div 
                         className={cn(
                           "flex relative items-center justify-center p-0",
-                          props.selected && "bg-brand-600 text-white rounded-md"
+                          isSameDay(props.date, date) && "bg-brand-600 text-white rounded-md"
                         )}
                       >
                         {props.date.getDate()}
