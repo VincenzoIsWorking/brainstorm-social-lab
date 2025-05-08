@@ -46,12 +46,13 @@ const EditResource = () => {
     return null; // Navigate will handle this
   }
 
+  // Fixed: Convert string tags to array format for the form
   const initialData = {
     title: resource.title,
     description: resource.description || "",
     content: resource.content,
     resource_type: resource.resource_type,
-    tags: resource.tags?.join(", ") || "",
+    tags: resource.tags || [], // Ensure tags is always an array
   };
 
   return (

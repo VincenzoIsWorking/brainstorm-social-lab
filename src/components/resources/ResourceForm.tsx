@@ -59,7 +59,11 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const defaultValues = initialData || {
+  // Convert array tags to comma-separated string for the form input
+  const formattedInitialData = initialData ? {
+    ...initialData,
+    tags: Array.isArray(initialData.tags) ? initialData.tags.join(", ") : "",
+  } : {
     title: "",
     description: "",
     content: "",
@@ -69,7 +73,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues: formattedInitialData,
   });
 
   const { formState } = form;
@@ -211,7 +215,6 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
                     <Input 
                       placeholder="Enter tags separated by commas..." 
                       {...field} 
-                      value={typeof field.value === 'string' ? field.value : field.value?.join(', ')} 
                     />
                   </FormControl>
                   <FormDescription>
