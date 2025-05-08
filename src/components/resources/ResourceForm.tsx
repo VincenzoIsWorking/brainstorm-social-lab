@@ -53,7 +53,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
     description: initialData?.description || "",
     content: initialData?.content || "",
     resource_type: initialData?.resource_type || "article",
-    // The tags field in FormValues is a string (before transform), so we need a string here:
+    // Fix: The tags field in FormValues expects a string input (before transform)
     tags: Array.isArray(initialData?.tags) ? initialData.tags.join(", ") : "",
   };
 

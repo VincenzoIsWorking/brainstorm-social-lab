@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -97,18 +96,22 @@ export default {
 			keyframes: {
 				'accordion-down': {
 					from: {
-						height: '0'
+						height: '0',
+						opacity: '0'
 					},
 					to: {
-						height: 'var(--radix-accordion-content-height)'
+						height: 'var(--radix-accordion-content-height)',
+						opacity: '1'
 					}
 				},
 				'accordion-up': {
 					from: {
-						height: 'var(--radix-accordion-content-height)'
+						height: 'var(--radix-accordion-content-height)',
+						opacity: '1'
 					},
 					to: {
-						height: '0'
+						height: '0',
+						opacity: '0'
 					}
 				},
 				"fade-in": {
@@ -161,23 +164,10 @@ export default {
 					"0%, 100%": { opacity: "1" },
 					"50%": { opacity: "0.5" }
 				},
-				"float": {
-					"0%, 100%": { transform: "translateY(0)" },
-					"50%": { transform: "translateY(-10px)" }
-				},
-				"shimmer": {
-					"0%": { backgroundPosition: "-200% 0" },
-					"100%": { backgroundPosition: "200% 0" }
-				},
-				"bounce-smooth": {
-					"0%, 100%": {
-						transform: "translateY(0)",
-						animationTimingFunction: "cubic-bezier(0.8, 0, 1, 1)"
-					},
-					"50%": {
-						transform: "translateY(-15px)",
-						animationTimingFunction: "cubic-bezier(0, 0, 0.2, 1)"
-					}
+				"gradientShift": {
+					"0%": { backgroundPosition: "0% 50%" },
+					"50%": { backgroundPosition: "100% 50%" },
+					"100%": { backgroundPosition: "0% 50%" }
 				}
 			},
 			animation: {
@@ -192,6 +182,7 @@ export default {
 				"float": "float 4s ease-in-out infinite",
 				"shimmer": "shimmer 2s linear infinite",
 				"bounce-smooth": "bounce-smooth 2s ease-in-out infinite",
+				"gradientShift": "gradientShift 15s ease infinite"
 			},
 			transitionProperty: {
 				'height': 'height',

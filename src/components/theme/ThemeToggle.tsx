@@ -15,7 +15,18 @@ export function ThemeToggle() {
   }, []);
 
   if (!mounted) {
-    return null;
+    // Return a placeholder with same dimensions to prevent layout shift
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="transition-transform hover:scale-110"
+        disabled
+      >
+        <MoonIcon className="h-5 w-5 text-muted" />
+        <span className="sr-only">Theme toggle placeholder</span>
+      </Button>
+    );
   }
 
   return (
@@ -26,14 +37,14 @@ export function ThemeToggle() {
             variant="ghost"
             size="icon"
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="transition-transform hover:scale-110"
+            className="transition-all duration-300 hover:scale-110 hover:rotate-12"
           >
             {theme === "dark" ? (
-              <SunIcon className="h-5 w-5 text-yellow-400" />
+              <SunIcon className="h-5 w-5 text-yellow-400 animate-pulse-slow" />
             ) : (
               <MoonIcon className="h-5 w-5 text-blue-500" />
             )}
-            <span className="sr-only">Cambia tema</span>
+            <span className="sr-only">{theme === "dark" ? "Passa al tema chiaro" : "Passa al tema scuro"}</span>
           </Button>
         </TooltipTrigger>
         <TooltipContent>
