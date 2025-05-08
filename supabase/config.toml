@@ -1,14 +1,8 @@
 
 project_id = "jbkhojrdrdfjjengpoeg"
-[api]
-enabled = true
-[db]
-enabled = true
-[realtime]
-enabled = true
-[auth]
-enabled = true
-[storage]
-enabled = true
-[edge_functions]
-enabled = true
+
+[functions.perplexity-search]
+verify_jwt = true
+
+[functions.generate-content]
+verify_jwt = true

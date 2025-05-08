@@ -6,11 +6,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Loader2, Save, ArrowLeft } from "lucide-react";
-import { ResourceFormData, useResources } from "@/hooks/useResources";
+import { useResources } from "@/hooks/useResources";
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-// Import our new components
+// Import our components
 import ResourceFormFields from "./ResourceFormFields";
 import AIContentGenerator from "./AIContentGenerator";
 import ResourceContentField from "./ResourceContentField";
@@ -23,16 +23,17 @@ const formSchema = z.object({
   tags: z.string().optional().transform(val => val ? val.split(",").map(tag => tag.trim()).filter(Boolean) : []),
 });
 
-export interface ResourceFormData {
-  title: string;
-  description?: string;
-  content: string;
-  resource_type: string;
-  tags?: string[];
-}
+// This is the form data type used by the component
+type FormValues = z.infer<typeof formSchema>;
 
 interface ResourceFormProps {
-  initialData?: ResourceFormData;
+  initialData?: {
+    title: string;
+    description?: string;
+    content: string;
+    resource_type: string;
+    tags?: string[];
+  };
   isEditing?: boolean;
   resourceId?: string;
 }
@@ -47,9 +48,9 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
   const navigate = useNavigate();
 
   // Convert array tags to comma-separated string for the form input
-  const formattedInitialData = initialData ? {
+  const formattedInitialData: FormValues = initialData ? {
     ...initialData,
-    tags: Array.isArray(initialData.tags) ? initialData.tags.join(", ") : initialData.tags || "",
+    tags: Array.isArray(initialData.tags) ? initialData.tags.join(", ") : "",
   } : {
     title: "",
     description: "",
@@ -58,7 +59,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
     tags: "",
   };
 
-  const form = useForm<z.infer<typeof formSchema>>({
+  const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: formattedInitialData,
   });
@@ -66,7 +67,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
   const { formState } = form;
   const isSubmitting = formState.isSubmitting;
 
-  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+  const onSubmit = async (values: FormValues) => {
     try {
       if (isEditing && resourceId) {
         await updateResource(resourceId, values);
@@ -75,7 +76,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
           description: "Your resource has been updated successfully",
         });
       } else {
-        await createResource(values as ResourceFormData);
+        await createResource(values);
         toast({
           title: "Resource created",
           description: "Your resource has been created successfully",

@@ -1,7 +1,8 @@
+
 import React from "react";
 import { Button } from "@/components/ui/button";
-import { LightbulbIcon, User, LogOut, Menu } from "lucide-react";
-import { Link } from "react-router-dom";
+import { LightbulbIcon, User, LogOut, Menu, Calendar, Search } from "lucide-react";
+import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/auth";
 import {
   DropdownMenu,
@@ -16,6 +17,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 const Navbar = () => {
   const { isAuthenticated, user, profile, signOut } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false);
+  const location = useLocation();
 
   const getInitials = () => {
     if (profile?.full_name) {
@@ -31,6 +33,25 @@ const Navbar = () => {
     return "U";
   };
 
+  // Navigation links
+  const publicLinks = [
+    { to: "/features", label: "Funzionalità" },
+    { to: "/pricing", label: "Prezzi" },
+    { to: "/blog", label: "Blog" },
+    { to: "/guides", label: "Guide" },
+    { to: "/templates", label: "Template" },
+    { to: "/faq", label: "FAQ" },
+    { to: "/support", label: "Supporto" },
+  ];
+  
+  const privateLinks = [
+    { to: "/dashboard", label: "Dashboard" },
+    { to: "/ideas", label: "Le mie idee" },
+    { to: "/resources", label: "Risorse" },
+    { to: "/calendar", label: "Calendario" },
+    { to: "/research", label: "Ricerca" },
+  ];
+
   return (
     <header className="border-b bg-white dark:bg-gray-950">
       <div className="container flex h-16 items-center justify-between">
@@ -43,15 +64,39 @@ const Navbar = () => {
         
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-6">
-          <Link to="/dashboard" className="text-sm font-medium hover:text-brand-600 transition-colors">
-            Dashboard
-          </Link>
-          <Link to="/ideas" className="text-sm font-medium hover:text-brand-600 transition-colors">
-            Le mie idee
-          </Link>
-          <Link to="/resources" className="text-sm font-medium hover:text-brand-600 transition-colors">
-            Risorse
-          </Link>
+          {isAuthenticated ? (
+            <>
+              {privateLinks.map((link) => (
+                <Link 
+                  key={link.to}
+                  to={link.to} 
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname === link.to 
+                      ? "text-brand-600" 
+                      : "hover:text-brand-600"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </>
+          ) : (
+            <>
+              {publicLinks.map((link) => (
+                <Link 
+                  key={link.to}
+                  to={link.to} 
+                  className={`text-sm font-medium transition-colors ${
+                    location.pathname === link.to 
+                      ? "text-brand-600" 
+                      : "hover:text-brand-600"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </>
+          )}
         </nav>
         
         {/* Auth Buttons or User Menu */}
@@ -76,6 +121,17 @@ const Navbar = () => {
                     <User className="mr-2 h-4 w-4" /> Profilo
                   </Link>
                 </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/calendar" className="cursor-pointer w-full">
+                    <Calendar className="mr-2 h-4 w-4" /> Calendario
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild>
+                  <Link to="/research" className="cursor-pointer w-full">
+                    <Search className="mr-2 h-4 w-4" /> Ricerca
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => signOut()}>
                   <LogOut className="mr-2 h-4 w-4" /> Logout
                 </DropdownMenuItem>
@@ -108,35 +164,39 @@ const Navbar = () => {
       {mobileMenuOpen && (
         <div className="md:hidden px-4 py-2 pb-4 bg-white dark:bg-gray-950 border-t">
           <nav className="flex flex-col space-y-3">
-            <Link 
-              to="/dashboard" 
-              className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Dashboard
-            </Link>
-            <Link 
-              to="/ideas" 
-              className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Le mie idee
-            </Link>
-            <Link 
-              to="/resources" 
-              className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Risorse
-            </Link>
-            {!isAuthenticated && (
-              <Link 
-                to="/auth" 
-                className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Accedi / Registrati
-              </Link>
+            {isAuthenticated ? (
+              // Private links for logged-in users
+              privateLinks.map((link) => (
+                <Link 
+                  key={link.to}
+                  to={link.to} 
+                  className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ))
+            ) : (
+              // Public links for visitors
+              <>
+                {publicLinks.map((link) => (
+                  <Link 
+                    key={link.to}
+                    to={link.to} 
+                    className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {link.label}
+                  </Link>
+                ))}
+                <Link 
+                  to="/auth" 
+                  className="px-4 py-2 text-sm font-medium hover:text-brand-600 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Accedi / Registrati
+                </Link>
+              </>
             )}
           </nav>
         </div>
