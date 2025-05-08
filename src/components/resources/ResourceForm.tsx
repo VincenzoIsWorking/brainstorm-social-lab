@@ -53,6 +53,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
     description: initialData?.description || "",
     content: initialData?.content || "",
     resource_type: initialData?.resource_type || "article",
+    // The type error is here - we need to provide a string, not an array
     tags: Array.isArray(initialData?.tags) ? initialData.tags.join(", ") : "",
   };
 
