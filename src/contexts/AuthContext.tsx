@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -157,14 +156,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Clean up auth state first
       cleanupAuthState();
 
+      console.log("Starting Google OAuth sign-in...");
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'email profile',
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Google OAuth error:", error);
+        throw error;
+      }
+      
+      console.log("Google OAuth initiated successfully:", data);
 
     } catch (error: any) {
       console.error("Error signing in with Google:", error.message);

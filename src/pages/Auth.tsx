@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
@@ -65,9 +64,10 @@ const Auth = () => {
       email: "",
       password: "",
     },
+    mode: "onChange",
   });
 
-  // Register form setup
+  // Register form setup with explicit default values to fix input issues
   const registerForm = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -77,7 +77,11 @@ const Auth = () => {
       fullName: "",
       username: "",
     },
+    mode: "onChange",
   });
+  
+  // Add debugging log to monitor form state changes for registration
+  console.log("Register form state:", registerForm.formState);
 
   const onLoginSubmit = async (values: LoginFormValues) => {
     setIsLoading(true);
@@ -93,6 +97,7 @@ const Auth = () => {
   };
 
   const onRegisterSubmit = async (values: RegisterFormValues) => {
+    console.log("Register form submitted with values:", values);
     setIsLoading(true);
     setError(null);
     try {
@@ -115,6 +120,7 @@ const Auth = () => {
     setGoogleLoading(true);
     setError(null);
     try {
+      console.log("Initiating Google sign in from Auth.tsx");
       await signInWithGoogle();
       // Redirect will happen automatically by Supabase
     } catch (error: any) {
@@ -265,6 +271,10 @@ const Auth = () => {
                         placeholder="Il tuo nome completo"
                         disabled={isLoading}
                         {...field}
+                        onChange={(e) => {
+                          console.log("fullName changed:", e.target.value);
+                          field.onChange(e);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -283,6 +293,10 @@ const Auth = () => {
                         placeholder="Username unico"
                         disabled={isLoading}
                         {...field}
+                        onChange={(e) => {
+                          console.log("username changed:", e.target.value);
+                          field.onChange(e);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
